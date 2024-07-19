@@ -158,16 +158,15 @@ function generateSummaryInfo(doc, invoiceInfo: InvoiceParam) {
   let position = SUMMARY_INFO_TOP
   const SUMMARY_ROW_SPACING = 20
 
-  const summaryInfo = {
-    'Total (Excl. Tax)': formatCurrencyAmountTo2DpWithUnitAndComma(totalExclTax, currencyCode),
-    'Tax': formatCurrencyAmountTo2DpWithUnitAndComma(tax, currencyCode),
-  }
+  const summaryInfo = {}
+  summaryInfo['Total (Excl. Tax)'] = formatCurrencyAmountTo2DpWithUnitAndComma(totalExclTax, currencyCode)
   
   if (discount > 0) {
     const discountLabel = `Discount (${formatNumberUpTo6DpWithUnitAndComma(discountPct)}%)`
     summaryInfo[discountLabel] = formatCurrencyAmountTo2DpWithUnitAndComma(discount, currencyCode)
   }
-  
+
+  summaryInfo['Tax'] = formatCurrencyAmountTo2DpWithUnitAndComma(tax, currencyCode)
   summaryInfo['Grand Total'] = formatCurrencyAmountTo2DpWithUnitAndComma(grandTotal, currencyCode)
 
   for (const label in summaryInfo) {
