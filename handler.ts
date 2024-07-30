@@ -10,10 +10,7 @@ import { uploadToS3 } from './s3/s3.ts'
 export interface InvoiceParam {
   issuanceTxId: string
   companyName: string
-  // address: string
-  // postalCode: string
-  // city: string
-  // country: string
+  address: string
 
   deviceName: string
   quantity: number
@@ -34,10 +31,7 @@ export interface InvoiceParam {
 const invoiceParams = {
   issuanceTxId: 'a',
   companyName: 'Lim Jia Hao',
-  // address: '69420000 0wefgwergergh wgesgerh er hrt hrthrthrdfergeg',
-  // postalCode: '123456',
-  // city: 'NEW YORKKK',
-  // country: 'usaaaa',
+  address: '69420000 0wefgwergergh wgesgerh er hrt hrthrthrdfergeg',
 
   deviceName: 'Test asset',
   quantity: 50000.1234,
@@ -84,7 +78,7 @@ export async function generateInvoice(invoiceInfo: InvoiceParam) {
 }
 
 function generateDetails(doc, invoiceInfo: InvoiceParam) {
-  const { issuanceTxId, companyName } = invoiceInfo
+  const { issuanceTxId, companyName, address } = invoiceInfo
 
   doc.font(DEFAULT_FONT).fontSize(DEFAULT_FONT_SIZE)
 
@@ -102,16 +96,13 @@ function generateDetails(doc, invoiceInfo: InvoiceParam) {
   x = A4_WIDTH_MID - 20
   doc
     .text('Company Name:', x, y + DEFAULT_SPACING)
-    // .text('Address:', x, y + 2 * DEFAULT_SPACING)
+    .text('Address:', x, y + 2 * DEFAULT_SPACING)
 
   x += 80
   const maxWidthForName = MAX_X - x
   doc
     .text(companyName, x, y + DEFAULT_SPACING, { width: maxWidthForName, height: DEFAULT_SPACING, ellipsis: true })
-    // .text(address, x, y + 2 * DEFAULT_SPACING, { width: maxWidthForName, height: DEFAULT_SPACING, ellipsis: true })
-    // .text(postalCode, x, y + 3 * DEFAULT_SPACING, { width: maxWidthForName, height: DEFAULT_SPACING, ellipsis: true })
-    // .text(city, x, y + 4 * DEFAULT_SPACING, { width: maxWidthForName, height: DEFAULT_SPACING, ellipsis: true })
-    // .text(country, x, y + 5 * DEFAULT_SPACING, { width: maxWidthForName, height: DEFAULT_SPACING, ellipsis: true })
+    .text(address, x, y + 2 * DEFAULT_SPACING, { width: maxWidthForName })
 }
 
 function generateInvoiceTable(doc, invoiceInfo: InvoiceParam) {
