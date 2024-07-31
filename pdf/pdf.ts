@@ -50,7 +50,7 @@ function generateHeader(doc, logoImage) {
     .image(logoImage, MARGIN_NARROW, 55, { height: 40 })
     .fillColor(DEFAULT_COLOR)
     .text('InterOpera Pte. Ltd.', 200, 55, { align: 'right' })
-    .text('10 Anson Rd, #34-16 International Plaza', 200, 70, { align: 'right' })
+    .text('79 Anson Road, #06-05', 200, 70, { align: 'right' })
     .text('Singapore 079903', 200, 85, { align: 'right' })
     .text('UEN No.: 202115516D', 200, 100, { align: 'right' })
     // .text('GST Reg No.: <TO BE CONFIRMED>', 200, 115, { align: 'right' })
