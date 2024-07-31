@@ -1,0 +1,33 @@
+{
+  "name": "device-registration-invoice-lambda",
+  "version": "1.0.0",
+  "description": "",
+  "main": "handler.ts",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "aws-sdk": "^2.1436.0",
+    "clipboardy": "^4.0.0",
+    "get-stream": "^6.0.1",
+    "moment": "^2.29.4",
+    "numeral": "^2.0.6",
+    "pdfkit": "^0.13.0",
+    "serverless": "^3.34.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.4.9",
+    "@typescript-eslint/eslint-plugin": "^5.62.0",
+    "esbuild": "^0.14.25",
+    "eslint": "^8.47.0",
+    "eslint-config-standard-with-typescript": "^37.0.0",
+    "eslint-plugin-import": "^2.28.0",
+    "eslint-plugin-n": "^16.0.1",
+    "eslint-plugin-promise": "^6.1.1",
+    "serverless-esbuild": "^1.46.0",
+    "typescript": "^5.1.6"
+  }
+}
