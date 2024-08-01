@@ -1,0 +1,58 @@
+service: aws-lambda-issuance-invoice
+frameworkVersion: '3'
+
+provider:
+  name: aws
+  runtime: nodejs16.x
+  region: ap-southeast-1
+  stage: staging
+
+functions:
+  generateIssuanceInvoice:
+    handler: handler.generateInvoice
+    role: generateIssuanceInvoice
+    environment:
+      S3_BUCKET_NAME: tf-s3-operax-staging.interopera.co-storage
+
+plugins:
+  - serverless-esbuild
+
+package:
+  patterns:
+    - 'static/**'
+
+custom:
+  esbuild:
+    external:
+      - pdfkit
+
+resources:
+  Resources:
+    generateIssuanceInvoice:
+      Type: AWS::IAM::Role
+      Properties:
+        Path: /
+        RoleName: generateIssuanceInvoice
+        AssumeRolePolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Principal:
+                Service:
+                  - lambda.amazonaws.com
+              Action: sts:AssumeRole
+        Policies:
+          - PolicyName: S3
+            PolicyDocument:
+              Version: '2012-10-17'
+              Statement:
+                - Effect: Allow
+                  Action:
+                    - s3:ListBucket
+                  Resource: "*"
+                - Effect: Allow
+                  Action:
+                    - s3:*
+                  Resource:
+                    - arn:aws:s3:::tf-s3-operax-staging.interopera.co-storage
+                    - arn:aws:s3:::tf-s3-operax-staging.interopera.co-storage/*

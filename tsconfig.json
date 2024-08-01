@@ -1,0 +1,19 @@
+{
+    "compilerOptions": {
+        "target": "ESNext",
+        "lib": [
+            "ESNext"
+        ],
+        "module": "ESNext",
+        "resolveJsonModule": true,
+        "declaration": true,
+        "emitDeclarationOnly": true,
+        "isolatedModules": true,
+        "moduleResolution": "Node16",
+        "allowImportingTsExtensions": true,
+        "outDir": "./dist",
+        "esModuleInterop": true,
+        "baseUrl": ".",
+        "strictNullChecks": true
+    }
+}
