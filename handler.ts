@@ -7,8 +7,14 @@ import {
 } from './pdf/pdf.ts'
 import { uploadToS3 } from './s3/s3.ts'
 
+enum InvoiceType {
+  "REC Issuance" = "REC-Issuance",
+  "REC Redemption" = "REC-Redemption"
+}
+
 export interface InvoiceParam {
-  issuanceTxId: string
+  invoiceType: string
+  txId: string
   companyName: string
   address: string
 
@@ -29,7 +35,8 @@ export interface InvoiceParam {
 }
 
 const invoiceParams = {
-  issuanceTxId: 'a',
+  invoiceType: "REC Redemption",
+  txId: 'a',
   companyName: 'Lim Jia Hao',
   address: '69420000 0wefgwergergh wgesgerh er hrt hrthrthrdfergeg',
 
@@ -58,7 +65,12 @@ interface Response {
 export async function generateInvoice(invoiceInfo: InvoiceParam) {
   const resp: Response = {}
   try {
-    const { issuanceTxId } = invoiceInfo
+    const { txId, invoiceType } = invoiceInfo
+    
+    if (!Object.keys(InvoiceType).includes(invoiceType as InvoiceType)) {
+      throw new Error("invalid invoice type received")
+    }
+
     const doc = generatePdfTemplate('Payment Invoice')
     generateDetails(doc, invoiceInfo)
     generateInvoiceTable(doc, invoiceInfo)
@@ -66,7 +78,10 @@ export async function generateInvoice(invoiceInfo: InvoiceParam) {
     doc.end()
     const buffer = await getStream.buffer(doc)
 
-    const url = await uploadToS3(buffer, issuanceTxId)
+    const fileNamePrefix = InvoiceType[invoiceType as keyof typeof InvoiceType]
+    const filename =  `${fileNamePrefix}-Invoice-${txId}-${Date.now()}.pdf`
+
+    const url = await uploadToS3(buffer, filename)
     resp.data = buffer.toString('base64')
     resp.url = url
   } catch (err) {
@@ -78,7 +93,7 @@ export async function generateInvoice(invoiceInfo: InvoiceParam) {
 }
 
 function generateDetails(doc, invoiceInfo: InvoiceParam) {
-  const { issuanceTxId, companyName, address } = invoiceInfo
+  const { txId, companyName, address } = invoiceInfo
 
   doc.font(DEFAULT_FONT).fontSize(DEFAULT_FONT_SIZE)
 
@@ -90,7 +105,7 @@ function generateDetails(doc, invoiceInfo: InvoiceParam) {
 
   x += 100
   doc
-    .text(issuanceTxId, x, y + DEFAULT_SPACING)
+    .text(txId, x, y + DEFAULT_SPACING)
     .text(moment().format(DATE_FORMAT), x, y + 2 * DEFAULT_SPACING)
 
   x = A4_WIDTH_MID - 20
@@ -106,7 +121,7 @@ function generateDetails(doc, invoiceInfo: InvoiceParam) {
 }
 
 function generateInvoiceTable(doc, invoiceInfo: InvoiceParam) {
-  const { currencyCode, deviceName, quantity, issuer, startDate, endDate, unitPrice, tax, totalExclTax } = invoiceInfo
+  const { invoiceType, currencyCode, deviceName, quantity, issuer, startDate, endDate, unitPrice, tax, totalExclTax } = invoiceInfo
   let position = INVOICE_TABLE_TOP
 
   generateTableRow(
@@ -125,13 +140,13 @@ function generateInvoiceTable(doc, invoiceInfo: InvoiceParam) {
   position += DEFAULT_SPACING
 
   const quantityStr = formatNumberUpTo6DpWithUnitAndComma(quantity, "RECs")
-  const issuanceInfo = ['REC Issuance', deviceName, quantityStr, issuer, `${startDate} - ${endDate}`]
+  const info = [invoiceType, deviceName, quantityStr, issuer, `${startDate} - ${endDate}`]
   const taxValue = tax > 0 ? formatCurrencyAmountTo2DpWithUnitAndComma(tax) : 'No Tax'
     
   generateTableRow(
     doc,
     position,
-    issuanceInfo,
+    info,
     [formatNumberUpTo6DpWithUnitAndComma(quantity)],
     [formatCurrencyAmountTo2DpWithUnitAndComma(unitPrice)],
     [taxValue],
@@ -139,7 +154,7 @@ function generateInvoiceTable(doc, invoiceInfo: InvoiceParam) {
     false
   )
 
-  position += (issuanceInfo.length + 1) * DEFAULT_SPACING
+  position += (info.length + 1) * DEFAULT_SPACING
   generateHr(doc, position) 
 }
 
