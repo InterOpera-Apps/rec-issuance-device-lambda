@@ -1,7 +1,7 @@
 import getStream from 'get-stream'
 import moment from 'moment'
 import {
-  DETAILS_TOP, INVOICE_TABLE_TOP, SUMMARY_INFO_TOP, DEFAULT_SPACING, A4_WIDTH, A4_WIDTH_MID, MAX_X, BOLD_FONT,
+  DETAILS_TOP, INVOICE_TABLE_TOP, SUMMARY_INFO_TOP, DEFAULT_SPACING, A4_WIDTH, A4_WIDTH_MID, MAX_X, MAX_Y, BOLD_FONT,
   DATE_FORMAT, DEFAULT_FONT, DEFAULT_FONT_SIZE, DEFAULT_COLOR, formatCurrencyAmountTo2DpWithUnitAndComma, formatNumberUpTo6DpWithUnitAndComma,
   generateHr, generatePdfTemplate, MARGIN_NARROW,
 } from './pdf/pdf.ts'
@@ -165,6 +165,12 @@ function generateInvoiceTable(doc, invoiceInfo: InvoiceParam): number {
     const quantityStr = formatNumberUpTo6DpWithUnitAndComma(quantity, "RECs")
     const info = [invoiceType, deviceName, quantityStr, issuer, `${startDate} - ${endDate}`]
     const taxValue = tax > 0 ? formatCurrencyAmountTo2DpWithUnitAndComma(tax) : 'No Tax'
+
+    const endPosition = position + (info.length - 1) * DEFAULT_SPACING // end position of current detail block
+    if (endPosition > MAX_Y) {
+      position = MARGIN_NARROW
+      doc.addPage()
+    }
     
     generateTableRow(
     doc,
@@ -177,7 +183,11 @@ function generateInvoiceTable(doc, invoiceInfo: InvoiceParam): number {
     false
     )
     
-    position += (info.length + 1) * DEFAULT_SPACING
+    position += (info.length + 1) * DEFAULT_SPACING // new position of subsequent detail block
+    if (position > MAX_Y) {
+      position = MARGIN_NARROW
+      doc.addPage()
+    }
   }
 
   generateHr(doc, position)
@@ -187,9 +197,6 @@ function generateInvoiceTable(doc, invoiceInfo: InvoiceParam): number {
 function generateSummaryInfo(doc, invoiceInfo: InvoiceParam, position: number) {
   const { totalExclTax, tax, discountPct, discount, grandTotal, currencyCode } = invoiceInfo
 
-  position += DEFAULT_SPACING
-  const SUMMARY_ROW_SPACING = 20
-
   const summaryInfo = {}
   summaryInfo['Total (Excl. Tax)'] = formatCurrencyAmountTo2DpWithUnitAndComma(totalExclTax, currencyCode)
   
@@ -197,18 +204,23 @@ function generateSummaryInfo(doc, invoiceInfo: InvoiceParam, position: number) {
     const discountLabel = `Discount (${formatNumberUpTo6DpWithUnitAndComma(discountPct)}%)`
     summaryInfo[discountLabel] = formatCurrencyAmountTo2DpWithUnitAndComma(discount, currencyCode)
   }
-
+  
   summaryInfo['Tax'] = formatCurrencyAmountTo2DpWithUnitAndComma(tax, currencyCode)
   summaryInfo['Grand Total'] = formatCurrencyAmountTo2DpWithUnitAndComma(grandTotal, currencyCode)
-
+  summaryInfo['Payment Method'] = 'Wallet'
+  
+  const SUMMARY_ROW_SPACING = 20
   for (const label in summaryInfo) {
     const value = summaryInfo[label]
 
-    generateSummaryRow(doc, position, label, value)
     position += SUMMARY_ROW_SPACING
-  }
+    if (position + DEFAULT_SPACING > MAX_Y) {
+      position = MARGIN_NARROW
+      doc.addPage()
+    }
 
-  generateSummaryRow(doc, position, 'Payment Method', 'Wallet')
+    generateSummaryRow(doc, position, label, value)
+  }
 }
 
 function generateTableRow(doc, y: number, description: string[], quantity: string[], unitPrice: string[], tax: string[], total: string[], isHeader: boolean) {
