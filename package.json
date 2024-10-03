@@ -16,7 +16,7 @@
     "moment": "^2.29.4",
     "numeral": "^2.0.6",
     "pdfkit": "^0.13.0",
-    "serverless": "^4.4.4"
+    "serverless": "^3.39.0"
   },
   "devDependencies": {
     "@types/node": "^20.4.9",
